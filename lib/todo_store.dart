@@ -21,4 +21,16 @@ class TodoStore {
     }
     return null;
   }
+
+  Future<bool> addTodo(Todo newTodo) async {
+    try{
+      var box = await Hive.openBox(_boxName);
+      box.add(newTodo);
+      await box.close();
+      return true;
+    } catch (e){
+      Logger().e(e);
+      return false;
+    }
+  }
 }
