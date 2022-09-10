@@ -1,8 +1,11 @@
 import 'package:cubit_todo_list/business_logic/todo_state.dart';
+import 'package:cubit_todo_list/todo_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cubit_todo_list/business_logic/todo_cubit.dart';
 import 'package:cubit_todo_list/model/todo.dart';
+import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
 
 class TodoPage extends StatefulWidget {
   const TodoPage({Key? key}) : super(key: key);
@@ -28,6 +31,15 @@ class _TodoPageState extends State<TodoPage> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) => _addNewTodoPopupDialog(context),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
@@ -39,18 +51,18 @@ class _TodoPageState extends State<TodoPage> {
         children: [
           _getTodoList(
             todos: todos.where((todo) => !todo.finished).toList(),
-            onChanged: (value) => {
+            onChangedTodo: (todo) => {
               setState(() {
-                //switchFinishedness(todo);
+                switchFinishedness(todo);
               }),
             },
           ),
           Divider(),
           _getTodoList(
             todos: todos.where((todo) => todo.finished).toList(),
-            onChanged: (value) => {
+            onChangedTodo: (todo) => {
               setState(() {
-                //switchFinishedness(todo);
+                switchFinishedness(todo);
               }),
             },
           ),
@@ -61,7 +73,7 @@ class _TodoPageState extends State<TodoPage> {
 
   Widget _getTodoList({
     required List<Todo> todos,
-    required ValueChanged<bool?>? onChanged,
+    required ValueChanged<Todo> onChangedTodo,
   }) {
     return ListView.builder(
       padding: EdgeInsets.zero,
@@ -72,7 +84,9 @@ class _TodoPageState extends State<TodoPage> {
         var todo = todos[index];
         return CheckboxListTile(
           value: todo.finished,
-          onChanged: onChanged,
+          onChanged: (value) {
+            onChangedTodo(todo);
+          },
           title: Text(
             todo.value,
             style: TextStyle(
@@ -81,8 +95,84 @@ class _TodoPageState extends State<TodoPage> {
                   : TextDecoration.none,
             ),
           ),
+          secondary: todo.finished
+              ? Text(todo.checkedOff.toString(),
+            style: const TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic),
+            textAlign: TextAlign.center,
+          )
+              : null,
         );
       },
     );
+  }
+
+  Widget _addNewTodoPopupDialog(BuildContext context) {
+    final myNewTodoTextFieldController = TextEditingController();
+    return AlertDialog(
+      title: const Text('Neues Todo:'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          TextField(
+              controller: myNewTodoTextFieldController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Name des neuen Todos',
+              ))
+        ],
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Abbrechen'),
+        ),
+        TextButton(
+          onPressed: () async {
+            //context.read<TodoCubit>().addTodo(myNewTodoTextFieldController.text);
+            await addTodo(myNewTodoTextFieldController.text);
+            setState(() {});
+            Navigator.of(context).pop();
+          },
+          child: const Text('Ok'),
+        )
+      ],
+    );
+  }
+
+  Future addTodo(String newTodoName) async {
+    final theTodo = Todo(
+      uid: const Uuid().v4(),
+      value: newTodoName,
+      finished: false,
+      checkedOff: DateTime.now(),
+    );
+
+    await TodoStore().addTodo(theTodo);
+  }
+
+  switchFinishedness(Todo myTodo) async {
+    myTodo.finished = !myTodo.finished;
+
+    if (myTodo.finished) {
+      myTodo.checkedOff = DateTime.now();
+    }
+
+    var box = await Hive.openBox('todos');
+    if(myTodo.isInBox){
+      box.put(
+        myTodo.key,
+        Todo(
+            uid: myTodo.uid,
+            finished: myTodo.finished,
+            value: myTodo.value,
+            checkedOff: myTodo.checkedOff),
+      );
+    }
+    await box.close();
   }
 }
