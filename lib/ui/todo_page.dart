@@ -1,11 +1,9 @@
 import 'package:cubit_todo_list/business_logic/todo_state.dart';
-import 'package:cubit_todo_list/todo_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cubit_todo_list/business_logic/todo_cubit.dart';
 import 'package:cubit_todo_list/model/todo.dart';
 import 'package:hive/hive.dart';
-import 'package:uuid/uuid.dart';
 
 class TodoPage extends StatefulWidget {
   const TodoPage({Key? key}) : super(key: key);
@@ -15,31 +13,36 @@ class TodoPage extends StatefulWidget {
 }
 
 class _TodoPageState extends State<TodoPage> {
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Joels TODO Liste'),
-      ),
-      body: BlocBuilder<TodoCubit, TodoState>(
-        builder: (context, state) {
-          if (state.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return _getTodoLists(
+    return BlocBuilder<TodoCubit, TodoState>(
+      builder: (context, state) {
+        late Widget body;
+        if (state.loading) {
+          body = const Center(child: CircularProgressIndicator());
+        }
+        else {
+          body = _getTodoLists(
             state.todos,
           );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) => _addNewTodoPopupDialog(context),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+        }
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Joels TODO Liste'),
+          ),
+          body: body,
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => _addNewTodoPopupDialog(context),
+              );
+            },
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 
@@ -133,26 +136,13 @@ class _TodoPageState extends State<TodoPage> {
         ),
         TextButton(
           onPressed: () async {
-            //context.read<TodoCubit>().addTodo(myNewTodoTextFieldController.text);
-            await addTodo(myNewTodoTextFieldController.text);
-            setState(() {});
+            BlocProvider.of<TodoCubit>(context).addTodo(myNewTodoTextFieldController.text);
             Navigator.of(context).pop();
           },
           child: const Text('Ok'),
         )
       ],
     );
-  }
-
-  Future addTodo(String newTodoName) async {
-    final theTodo = Todo(
-      uid: const Uuid().v4(),
-      value: newTodoName,
-      finished: false,
-      checkedOff: DateTime.now(),
-    );
-
-    await TodoStore().addTodo(theTodo);
   }
 
   switchFinishedness(Todo myTodo) async {

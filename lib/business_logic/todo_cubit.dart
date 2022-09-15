@@ -35,35 +35,29 @@ class TodoCubit extends Cubit<TodoState> {
     }
   }
 
-  // void addTodo(String newTodoName) async {
-  //   emit(
-  //     const TodoState(),
-  //   );
-  //   final theTodo = Todo(
-  //     uid: const Uuid().v4(),
-  //     value: newTodoName,
-  //     finished: false,
-  //     checkedOff: DateTime.now(),
-  //   );
-  //
-  //   final worked = await TodoStore().addTodo(theTodo);
-  //
-  //   if(worked){
-  //     emit(
-  //       TodoState(
-  //         todos: state.todos,
-  //         loading: false,
-  //         error: null,
-  //       ),
-  //     );
-  //   } else {
-  //     emit(
-  //       TodoState(
-  //         todos: state.todos,
-  //         loading: false,
-  //         error: 'adding-todo-failed',
-  //       ),
-  //     );
-  //   }
-  // }
+  void addTodo(String newTodoName) async {
+    emit(
+      const TodoState(),
+    );
+    final theTodo = Todo(
+      uid: const Uuid().v4(),
+      value: newTodoName,
+      finished: false,
+      checkedOff: DateTime.now(),
+    );
+
+    final worked = await TodoStore().addTodo(theTodo);
+
+    if(worked){
+      getTodos();
+    } else {
+      emit(
+        TodoState(
+          todos: state.todos,
+          loading: false,
+          error: 'adding-todo-failed',
+        ),
+      );
+    }
+  }
 }
