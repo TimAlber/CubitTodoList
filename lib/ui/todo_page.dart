@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cubit_todo_list/business_logic/todo_cubit.dart';
 import 'package:cubit_todo_list/model/todo.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 
 class TodoPage extends StatefulWidget {
   const TodoPage({Key? key}) : super(key: key);
@@ -98,12 +99,12 @@ class _TodoPageState extends State<TodoPage> {
                   : TextDecoration.none,
             ),
           ),
-          secondary: todo.finished
-              ? Text(todo.checkedOff.toString(),
+          subtitle: todo.finished
+              ? Text(DateFormat('dd.MM.yyyy – kk:mm').format(todo.checkedOff),
             style: const TextStyle(
                 fontSize: 12,
                 fontStyle: FontStyle.italic),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
           )
               : null,
         );
