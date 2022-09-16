@@ -5,13 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:cubit_todo_list/model/todo.dart';
-//import 'package:vaira_flutter_test/ui/todo_page.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize hive and all necessary adapters
-  var dir = await getApplicationDocumentsDirectory();
-  Hive.init(dir.path);
+  if(!kIsWeb){
+    var dir = await getApplicationDocumentsDirectory();
+    Hive.init(dir.path);
+  }
   Hive.registerAdapter(TodoAdapter());
   runApp(MyApp());
 }
