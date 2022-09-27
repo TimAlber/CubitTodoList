@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Initialize hive and all necessary adapters
-  if(!kIsWeb){
+  if (!kIsWeb) {
     var dir = await getApplicationDocumentsDirectory();
     Hive.init(dir.path);
   }
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Vaira Flutter Test',
+      title: 'Most Simple Todo List',
       theme: ThemeData(
         primaryColor: Colors.orange,
         primarySwatch: Colors.orange,

@@ -15,10 +15,8 @@ class TodoState extends Equatable {
 
   @override
   List<Object?> get props => [
-    error,
-    loading,
-    todos,
-  ];
-
-
+        error,
+        loading,
+        todos,
+      ];
 }

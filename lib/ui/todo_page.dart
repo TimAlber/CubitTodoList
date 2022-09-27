@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cubit_todo_list/business_logic/todo_cubit.dart';
 import 'package:cubit_todo_list/model/todo.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 
 class TodoPage extends StatefulWidget {
@@ -28,7 +27,7 @@ class _TodoPageState extends State<TodoPage> {
         }
         return Scaffold(
           appBar: AppBar(
-            title: Text('Joels TODO Liste'),
+            title: Text('Most Simple Todo List'),
           ),
           body: body,
           floatingActionButton: FloatingActionButton(

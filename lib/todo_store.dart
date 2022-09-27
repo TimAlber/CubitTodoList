@@ -19,21 +19,21 @@ class TodoStore {
   }
 
   Future<bool> addTodo(Todo newTodo) async {
-    try{
+    try {
       var box = await Hive.openBox(_boxName);
       box.add(newTodo);
       await box.close();
       return true;
-    } catch (e){
+    } catch (e) {
       Logger().e(e);
       return false;
     }
   }
 
   Future<bool> saveSwitchedTodo(Todo myTodo) async {
-    try{
+    try {
       var box = await Hive.openBox('todos');
-      if(myTodo.isInBox){
+      if (myTodo.isInBox) {
         box.put(
           myTodo.key,
           Todo(
@@ -45,20 +45,20 @@ class TodoStore {
       }
       await box.close();
       return true;
-    } catch (e){
+    } catch (e) {
       Logger().e(e);
       return false;
     }
   }
 
   Future<bool> deleteTodo(myTodo) async {
-    try{
+    try {
       var box = await Hive.openBox('todos');
-      if(myTodo.isInBox){
+      if (myTodo.isInBox) {
         box.delete(myTodo.key);
       }
       return true;
-    } catch (e){
+    } catch (e) {
       Logger().e(e);
       return false;
     }
