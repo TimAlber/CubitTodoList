@@ -48,7 +48,7 @@ class TodoCubit extends Cubit<TodoState> {
 
     final worked = await TodoStore().addTodo(theTodo);
 
-    if(worked){
+    if (worked) {
       getTodos();
     } else {
       emit(
@@ -73,7 +73,25 @@ class TodoCubit extends Cubit<TodoState> {
     }
 
     final worked = await TodoStore().saveSwitchedTodo(myTodo);
-    if(worked){
+    if (worked) {
+      getTodos();
+    } else {
+      emit(
+        TodoState(
+          todos: state.todos,
+          loading: false,
+          error: 'adding-todo-failed',
+        ),
+      );
+    }
+  }
+
+  void deleteTodo(Todo myTodo) async {
+    emit(
+      const TodoState(),
+    );
+    final worked = await TodoStore().deleteTodo(myTodo);
+    if (worked) {
       getTodos();
     } else {
       emit(

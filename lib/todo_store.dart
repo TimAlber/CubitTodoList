@@ -50,4 +50,17 @@ class TodoStore {
       return false;
     }
   }
+
+  Future<bool> deleteTodo(myTodo) async {
+    try{
+      var box = await Hive.openBox('todos');
+      if(myTodo.isInBox){
+        box.delete(myTodo.key);
+      }
+      return true;
+    } catch (e){
+      Logger().e(e);
+      return false;
+    }
+  }
 }

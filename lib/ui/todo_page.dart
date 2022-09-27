@@ -14,7 +14,6 @@ class TodoPage extends StatefulWidget {
 }
 
 class _TodoPageState extends State<TodoPage> {
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TodoCubit, TodoState>(
@@ -22,8 +21,7 @@ class _TodoPageState extends State<TodoPage> {
         late Widget body;
         if (state.loading) {
           body = const Center(child: CircularProgressIndicator());
-        }
-        else {
+        } else {
           body = _getTodoLists(
             state.todos,
           );
@@ -48,8 +46,8 @@ class _TodoPageState extends State<TodoPage> {
   }
 
   Widget _getTodoLists(
-      List<Todo> todos,
-      ) {
+    List<Todo> todos,
+  ) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -60,6 +58,7 @@ class _TodoPageState extends State<TodoPage> {
                 BlocProvider.of<TodoCubit>(context).switchFinishedness(todo);
               }),
             },
+            longTapCallback: (todo) => {},
           ),
           Divider(),
           _getTodoList(
@@ -68,6 +67,12 @@ class _TodoPageState extends State<TodoPage> {
               setState(() {
                 BlocProvider.of<TodoCubit>(context).switchFinishedness(todo);
               }),
+            },
+            longTapCallback: (todo) => {
+              showDialog(
+                context: context,
+                builder: (_) => _getDeletePopup(context, todo),
+              ),
             },
           ),
         ],
@@ -78,6 +83,7 @@ class _TodoPageState extends State<TodoPage> {
   Widget _getTodoList({
     required List<Todo> todos,
     required ValueChanged<Todo> onChangedTodo,
+    required Function(Todo) longTapCallback,
   }) {
     return ListView.builder(
       padding: EdgeInsets.zero,
@@ -86,27 +92,32 @@ class _TodoPageState extends State<TodoPage> {
       itemCount: todos.length,
       itemBuilder: (context, index) {
         var todo = todos[index];
-        return CheckboxListTile(
-          value: todo.finished,
-          onChanged: (value) {
-            onChangedTodo(todo);
+        return InkWell(
+          onLongPress: () {
+            longTapCallback(todo);
           },
-          title: Text(
-            todo.value,
-            style: TextStyle(
-              decoration: todo.finished
-                  ? TextDecoration.lineThrough
-                  : TextDecoration.none,
+          child: CheckboxListTile(
+            value: todo.finished,
+            onChanged: (value) {
+              onChangedTodo(todo);
+            },
+            title: Text(
+              todo.value,
+              style: TextStyle(
+                decoration: todo.finished
+                    ? TextDecoration.lineThrough
+                    : TextDecoration.none,
+              ),
             ),
+            subtitle: todo.finished
+                ? Text(
+                    DateFormat('dd.MM.yyyy – kk:mm').format(todo.checkedOff),
+                    style: const TextStyle(
+                        fontSize: 12, fontStyle: FontStyle.italic),
+                    textAlign: TextAlign.left,
+                  )
+                : null,
           ),
-          subtitle: todo.finished
-              ? Text(DateFormat('dd.MM.yyyy – kk:mm').format(todo.checkedOff),
-            style: const TextStyle(
-                fontSize: 12,
-                fontStyle: FontStyle.italic),
-            textAlign: TextAlign.left,
-          )
-              : null,
         );
       },
     );
@@ -137,10 +148,37 @@ class _TodoPageState extends State<TodoPage> {
         ),
         TextButton(
           onPressed: () async {
-            BlocProvider.of<TodoCubit>(context).addTodo(myNewTodoTextFieldController.text);
+            BlocProvider.of<TodoCubit>(context)
+                .addTodo(myNewTodoTextFieldController.text);
             Navigator.of(context).pop();
           },
           child: const Text('Ok'),
+        )
+      ],
+    );
+  }
+
+  Widget _getDeletePopup(BuildContext context, Todo todo) {
+    return AlertDialog(
+      title: const Text('Todo Löschen?'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Abbrechen'),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.red,
+          ),
+          onPressed: () async {
+            setState(() {
+              BlocProvider.of<TodoCubit>(context).deleteTodo(todo);
+            });
+            Navigator.of(context).pop();
+          },
+          child: const Text('Löschen'),
         )
       ],
     );
