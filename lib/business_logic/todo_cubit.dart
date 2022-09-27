@@ -60,4 +60,29 @@ class TodoCubit extends Cubit<TodoState> {
       );
     }
   }
+
+  void switchFinishedness(Todo myTodo) async {
+    emit(
+      const TodoState(),
+    );
+
+    myTodo.finished = !myTodo.finished;
+
+    if (myTodo.finished) {
+      myTodo.checkedOff = DateTime.now();
+    }
+
+    final worked = await TodoStore().saveSwitchedTodo(myTodo);
+    if(worked){
+      getTodos();
+    } else {
+      emit(
+        TodoState(
+          todos: state.todos,
+          loading: false,
+          error: 'adding-todo-failed',
+        ),
+      );
+    }
+  }
 }

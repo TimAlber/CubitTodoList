@@ -57,7 +57,7 @@ class _TodoPageState extends State<TodoPage> {
             todos: todos.where((todo) => !todo.finished).toList(),
             onChangedTodo: (todo) => {
               setState(() {
-                switchFinishedness(todo);
+                BlocProvider.of<TodoCubit>(context).switchFinishedness(todo);
               }),
             },
           ),
@@ -66,7 +66,7 @@ class _TodoPageState extends State<TodoPage> {
             todos: todos.where((todo) => todo.finished).toList(),
             onChangedTodo: (todo) => {
               setState(() {
-                switchFinishedness(todo);
+                BlocProvider.of<TodoCubit>(context).switchFinishedness(todo);
               }),
             },
           ),
@@ -144,26 +144,5 @@ class _TodoPageState extends State<TodoPage> {
         )
       ],
     );
-  }
-
-  switchFinishedness(Todo myTodo) async {
-    myTodo.finished = !myTodo.finished;
-
-    if (myTodo.finished) {
-      myTodo.checkedOff = DateTime.now();
-    }
-
-    var box = await Hive.openBox('todos');
-    if(myTodo.isInBox){
-      box.put(
-        myTodo.key,
-        Todo(
-            uid: myTodo.uid,
-            finished: myTodo.finished,
-            value: myTodo.value,
-            checkedOff: myTodo.checkedOff),
-      );
-    }
-    await box.close();
   }
 }
